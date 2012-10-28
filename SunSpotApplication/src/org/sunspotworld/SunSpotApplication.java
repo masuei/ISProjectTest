@@ -9,11 +9,12 @@ package org.sunspotworld;
 import com.sun.spot.peripheral.radio.RadioFactory;
 import com.sun.spot.resources.Resources;
 import com.sun.spot.resources.transducers.ISwitch;
-import com.sun.spot.resources.transducers.ITriColorLED;
-import com.sun.spot.resources.transducers.ITriColorLEDArray;
 import com.sun.spot.service.BootloaderListenerService;
 import com.sun.spot.util.IEEEAddress;
-import com.sun.spot.util.Utils;
+import java.io.IOException;
+import javax.microedition.io.Connector;
+import javax.microedition.io.Datagram;
+import javax.microedition.io.DatagramConnection;
 import javax.microedition.midlet.MIDlet;
 import javax.microedition.midlet.MIDletStateChangeException;
 
@@ -26,30 +27,25 @@ import javax.microedition.midlet.MIDletStateChangeException;
  */
 public class SunSpotApplication extends MIDlet {
 
-    private ITriColorLEDArray leds = (ITriColorLEDArray) Resources.lookup(ITriColorLEDArray.class);
+    Sender sender;
+    String address="radiogram://broadcast:110";// Broadcast address.
+    String message ="Hello World!";// message
 
     protected void startApp() throws MIDletStateChangeException {
-        System.out.println("Hello, world");
-        BootloaderListenerService.getInstance().start();   // monitor the USB (if connected) and recognize commands from host
-
-        /**
-         * Outputting myselve address in console.
-         */
-        long ourAddr = RadioFactory.getRadioPolicyManager().getIEEEAddress();
-        System.out.println("Our radio address = " + IEEEAddress.toDottedHex(ourAddr));
-
-        ISwitch sw1 = (ISwitch) Resources.lookup(ISwitch.class, "SW1");
-        ITriColorLED led = leds.getLED(0);
-        led.setRGB(100,0,0);                    // set color to moderate red
-        while (sw1.isOpen()) {                  // done when switch is pressed
-            led.setOn();                        // Blink LED
-            Utils.sleep(250);                   // wait 1/4 seconds
-            led.setOff();
-            Utils.sleep(1000);                  // wait 1 second
+        try {
+            sender = new Sender(address);
+            int i = 0;
+            while(true){
+                sender.send(message+" : "+ Integer.toString(i));
+                i++;
+            }
+        } catch (IOException ex) {
         }
-        notifyDestroyed();                      // cause the MIDlet to exit
-    }
 
+    }
+    
+    
+    
     protected void pauseApp() {
         // This is not currently called by the Squawk VM
     }
@@ -62,4 +58,47 @@ public class SunSpotApplication extends MIDlet {
      */
     protected void destroyApp(boolean unconditional) throws MIDletStateChangeException {
     }
+}
+
+
+
+/**
+ * データを送るクラスです。
+ */
+class Sender {
+    DatagramConnection conn;
+    Datagram datagram;
+    
+    /**
+     * コンストラクタ
+     * @param address
+     * @throws IOException 
+     */
+    public Sender(String address) throws IOException{
+        conn = (DatagramConnection) Connector.open(address);
+        datagram = conn.newDatagram(conn.getMaximumLength());
+    }
+    
+    /** 
+     * 送りたいmessageをブロードキャストします。
+     * @param message
+     * @throws IOException
+     */
+    void send(String message) throws IOException{
+        /* stringをbyteに変換します。 */
+        byte [] data;
+        data = message.getBytes();
+        
+        datagram.reset();
+        datagram.write(data);
+        conn.send(datagram);
+    }
+}
+
+/**
+ * データを受け取るクラスです。
+ */
+class Receiver{
+    
+
 }
