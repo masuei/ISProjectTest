@@ -11,7 +11,6 @@ import com.sun.spot.resources.Resources;
 import com.sun.spot.resources.transducers.ISwitch;
 import com.sun.spot.service.BootloaderListenerService;
 import com.sun.spot.util.IEEEAddress;
-import java.io.*;
 import java.io.IOException;
 import javax.microedition.io.Connector;
 import javax.microedition.io.Datagram;
