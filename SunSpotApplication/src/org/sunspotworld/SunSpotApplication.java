@@ -18,6 +18,10 @@ import javax.microedition.io.DatagramConnection;
 import javax.microedition.midlet.MIDlet;
 import javax.microedition.midlet.MIDletStateChangeException;
 
+
+
+
+
 /**
  * The startApp method of this class is called by the VM to start the
  * application.
@@ -41,6 +45,8 @@ public class SunSpotApplication extends MIDlet {
             while(true){
                 sender.send(message+" : "+Integer.toString(i));
                 i++;
+                String message = recv.message();
+                System.out.println(message);
             }
         } catch (IOException ex) {
         }
@@ -60,10 +66,6 @@ public class SunSpotApplication extends MIDlet {
     protected void destroyApp(boolean unconditional) throws MIDletStateChangeException {
     }
 }
-
-
-
-
 /**
  * データを送るクラスです。
  */
@@ -90,8 +92,6 @@ class Sender {
         /* stringをbyteに変換します。 */
         byte [] data;
         data = message.getBytes();
-        BootloaderListenerService.getInstance().start();   // monitor the USB (if connected) and recognize commands from host
-
         
         datagram.reset();
         datagram.write(data);
@@ -108,11 +108,18 @@ class Receiver{
     DatagramConnection conn;
     Datagram datagram;
     
+    byte[] recv;
+    String message;
+    
     public Receiver(String receive) throws IOException{
         conn = (DatagramConnection) Connector.open(receive);
         datagram = conn.newDatagram(conn.getMaximumLength());
     }
     
-    
-    
+    String message() throws IOException{
+        recv = datagram.getData();
+        message = new String(recv);
+        
+        return message;
+    }
 }
