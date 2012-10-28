@@ -28,15 +28,16 @@ import javax.microedition.midlet.MIDletStateChangeException;
 public class SunSpotApplication extends MIDlet {
 
     Sender sender;
-    String address="radiogram://broadcast:110";// Broadcast address.
+    String broadcast="radiogram://broadcast:110";// Broadcast address.
+    String receive="radiogram://:110";
     String message ="Hello World!";// message
 
     protected void startApp() throws MIDletStateChangeException {
         try {
-            sender = new Sender(address);
+            sender = new Sender(broadcast);
             int i = 0;
             while(true){
-                sender.send(message+" : "+ Integer.toString(i));
+                sender.send(message+" : "+Integer.toString(i));
                 i++;
             }
         } catch (IOException ex) {
@@ -99,6 +100,12 @@ class Sender {
  * データを受け取るクラスです。
  */
 class Receiver{
+    DatagramConnection conn;
+    Datagram datagram;
     
-
+    public Receiver(String receive) throws IOException{
+        conn = (DatagramConnection) Connector.open(receive);
+        datagram = conn.newDatagram(conn.getMaximumLength());
+    }
+    
 }
