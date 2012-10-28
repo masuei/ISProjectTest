@@ -11,6 +11,7 @@ import com.sun.spot.resources.Resources;
 import com.sun.spot.resources.transducers.ISwitch;
 import com.sun.spot.service.BootloaderListenerService;
 import com.sun.spot.util.IEEEAddress;
+import java.io.*;
 import java.io.IOException;
 import javax.microedition.io.Connector;
 import javax.microedition.io.Datagram;
@@ -28,6 +29,7 @@ import javax.microedition.midlet.MIDletStateChangeException;
 public class SunSpotApplication extends MIDlet {
 
     Sender sender;
+    Receiver recv;
     String broadcast="radiogram://broadcast:110";// Broadcast address.
     String receive="radiogram://:110";
     String message ="Hello World!";// message
@@ -35,6 +37,7 @@ public class SunSpotApplication extends MIDlet {
     protected void startApp() throws MIDletStateChangeException {
         try {
             sender = new Sender(broadcast);
+            recv = new Receiver(receive);
             int i = 0;
             while(true){
                 sender.send(message+" : "+Integer.toString(i));
@@ -44,8 +47,6 @@ public class SunSpotApplication extends MIDlet {
         }
 
     }
-    
-    
     
     protected void pauseApp() {
         // This is not currently called by the Squawk VM
@@ -60,6 +61,7 @@ public class SunSpotApplication extends MIDlet {
     protected void destroyApp(boolean unconditional) throws MIDletStateChangeException {
     }
 }
+
 
 
 
@@ -89,6 +91,8 @@ class Sender {
         /* stringをbyteに変換します。 */
         byte [] data;
         data = message.getBytes();
+        BootloaderListenerService.getInstance().start();   // monitor the USB (if connected) and recognize commands from host
+
         
         datagram.reset();
         datagram.write(data);
@@ -96,6 +100,7 @@ class Sender {
         conn.send(datagram);
     }
 }
+
 
 /**
  * データを受け取るクラスです。
