@@ -1,4 +1,4 @@
-/*
+/* send
  * SunSpotApplication.java
  *
  * Created on 2012/10/28 17:21:26;
@@ -8,8 +8,8 @@ package org.sunspotworld;
 
 import com.sun.spot.peripheral.radio.RadioFactory;
 import com.sun.spot.resources.Resources;
-import com.sun.spot.resources.transducers.ISwitch;
-import com.sun.spot.service.BootloaderListenerService;
+import com.sun.spot.io.j2me.radiostream.*;
+import com.sun.spot.io.j2me.radiogram.*;
 import com.sun.spot.util.IEEEAddress;
 import java.io.IOException;
 import javax.microedition.io.Connector;
@@ -45,8 +45,7 @@ public class SunSpotApplication extends MIDlet {
             while(true){
                 sender.send(message+" : "+Integer.toString(i));
                 i++;
-                String message = recv.message();
-                System.out.println(message);
+
             }
         } catch (IOException ex) {
         }
@@ -90,11 +89,11 @@ class Sender {
      */
     void send(String message) throws IOException{
         /* stringÇbyteÇ…ïœä∑ÇµÇ‹Ç∑ÅB */
-        byte [] data;
-        data = message.getBytes();
+        //byte [] data;
+        //data = message.getBytes();
         
         datagram.reset();
-        datagram.write(data);
+        datagram.writeUTF(message);
         System.out.println(message);
         conn.send(datagram);
     }
