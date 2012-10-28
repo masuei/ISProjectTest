@@ -29,8 +29,8 @@ public class SunSpotApplication extends MIDlet {
 
     Sender sender;
     Receiver recv;
-    String broadcast="radiogram://broadcast:110";// Broadcast address.
-    String receive="radiogram://:110";
+    final String broadcast="radiogram://broadcast:110";// Broadcast address.
+    final String receive="radiogram://:110";
     String message ="Hello World!";// message
 
     protected void startApp() throws MIDletStateChangeException {
