@@ -92,6 +92,7 @@ class Sender {
         
         datagram.reset();
         datagram.write(data);
+        System.out.println(message);
         conn.send(datagram);
     }
 }
@@ -107,5 +108,7 @@ class Receiver{
         conn = (DatagramConnection) Connector.open(receive);
         datagram = conn.newDatagram(conn.getMaximumLength());
     }
+    
+    
     
 }
