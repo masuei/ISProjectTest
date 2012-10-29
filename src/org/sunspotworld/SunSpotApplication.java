@@ -38,12 +38,11 @@ public class SunSpotApplication extends MIDlet {
 
     protected void startApp() throws MIDletStateChangeException {
         try {
-            sender = new Sender(broadcast);
             recv = new Receiver(receive);
-            int i = 0;
             while (true) {
-                String RMessage = recv.message();
-                System.out.println(RMessage + " : Success!");
+                String RMessage;
+                RMessage = recv.onMessageReceived();
+                System.out.println(RMessage);
             }
         } catch (IOException ex) {
         }
@@ -111,7 +110,7 @@ class Receiver {
 
     DatagramConnection conn;
     Datagram datagram;
-    String recv;
+    byte[] recv;
     String message;
 
     public Receiver(String receive) throws IOException {
@@ -121,10 +120,11 @@ class Receiver {
         datagram = conn.newDatagram(conn.getMaximumLength());
     }
 
-    String message() throws IOException {
-        recv = datagram.readUTF();
-        //message = new String(recv);
+    String onMessageReceived() throws IOException {
+        recv = datagram.getData();
+        message = new String(recv);
+        System.out.println("if there is message in right,Success! : "+message);
 
-        return recv;
+        return message;
     }
 }
