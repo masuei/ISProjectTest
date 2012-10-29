@@ -89,12 +89,12 @@ class Sender {
      */
     void send(String message) throws IOException{
         /* string‚ğbyte‚É•ÏŠ·‚µ‚Ü‚·B */
-        //byte [] data;
-        //data = message.getBytes();
+        byte [] data;
+        data = message.getBytes();
         
         datagram.reset();
-        datagram.writeUTF(message);
-        System.out.println(message);
+        datagram.write(data);
+        System.out.println(data);
         conn.send(datagram);
     }
 }
