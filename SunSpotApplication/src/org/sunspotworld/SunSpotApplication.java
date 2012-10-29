@@ -1,10 +1,12 @@
-/* send
+/* 
  * SunSpotApplication.java
  *
  * Created on 2012/10/28 17:21:26;
  */
 package org.sunspotworld;
 
+import com.sun.spot.io.j2me.radiogram.RadiogramConnection;
+import com.sun.spot.peripheral.Spot;
 import java.io.IOException;
 import javax.microedition.io.Connector;
 import javax.microedition.io.Datagram;
@@ -22,18 +24,21 @@ import javax.microedition.midlet.MIDletStateChangeException;
 public class SunSpotApplication extends MIDlet {
 
     Sender sender;
-    Receiver recv;
+    Receiver receiver;
     final String broadcastAddr = "radiogram://broadcast:110";// Broadcast address.
     final String receiveAddr = "radiogram://:110";//Broadcasted address.
-    String message = "Hello World!";// message
+    String sendMessage = "Hello World!";// 送りたいメッセージ
+    String recvMessage;//受け取ったメッセージ
 
     protected void startApp() throws MIDletStateChangeException {
         try {
-            sender = new Sender(broadcastAddr);
-            recv = new Receiver(receiveAddr);
+            sender = new Sender(broadcastAddr);//Senderオブジェクトの新規作成
+            receiver = new Receiver(receiveAddr);//Receiverオブジェクトの新規作成
             int i = 0;
             while (true) {
-                sender.send(message + " : " + Integer.toString(i));
+                sender.send(sendMessage + " : " + Integer.toString(i));//sendメソッドでsendMessage変数内のデータをブロードキャスト
+                recvMessage = receiver.onMessageReceived();//onMessageReceivedメソッドで送られてきたメッセージをrecvMessageに格納
+                System.out.println(recvMessage);//recvMessage変数内の文字列をコンソールに出力。
                 i++;
             }
         } catch (IOException ex) {
@@ -57,14 +62,13 @@ public class SunSpotApplication extends MIDlet {
 }
 
 /**
- * データを送るクラスです。
+ * データをブロードキャストするクラスです。
  */
 class Sender {
 
     DatagramConnection conn;
     Datagram datagram;
     byte[] data;
-    
 
     /**
      * [コンストラクタ] addressにDatagramConnectionオブジェクトを適用し通信を確立します。
@@ -73,8 +77,10 @@ class Sender {
      * @throws IOException
      */
     public Sender(String address) throws IOException {
-        conn = (DatagramConnection) Connector.open(address);
-        datagram = conn.newDatagram(conn.getMaximumLength());
+        Spot.getInstance().getRadioPolicyManager().setOutputPower(31);//出力の範囲の指定(-32～31)
+        conn = (DatagramConnection) Connector.open(address);//addressに対してDatagramConnection(conn)を開く。
+        ((RadiogramConnection) conn).setMaxBroadcastHops(3);//最大ホップ数の指定
+        datagram = conn.newDatagram(conn.getMaximumLength());//受け取れるデータの最大数の指定
     }
 
     /**
@@ -83,13 +89,12 @@ class Sender {
      * @param message
      * @throws IOException
      */
-    void send(String message) throws IOException {
-        data = message.getBytes();
+    void send(String sendMessage) throws IOException {
+        data = sendMessage.getBytes();//引数sendMessageをbyte[]に型変換してdata変数に格納
 
-        datagram.reset();
-        datagram.write(data);
-        System.out.println(data);
-        conn.send(datagram);
+        datagram.reset();//datagram内にあるデータをリセット
+        datagram.write(data);//datagramに変数dataを書き込む
+        conn.send(datagram);//DatagramConnection(conn)でdatagramに書き込まれたデータをブロードキャストする。
     }
 }
 
@@ -101,7 +106,7 @@ class Receiver {
     DatagramConnection conn;
     Datagram datagram;
     byte[] recv;
-    String message;
+    String recvMessage;
 
     /**
      * [コンストラクタ] addressにDatagramConnectionオブジェクトを適用し通信を確立します。
@@ -110,8 +115,10 @@ class Receiver {
      * @throws IOException
      */
     public Receiver(String address) throws IOException {
-        conn = (DatagramConnection) Connector.open(address);
-        datagram = conn.newDatagram(conn.getMaximumLength());
+        Spot.getInstance().getRadioPolicyManager().setOutputPower(31);//出力の範囲の指定(-32～31)
+        conn = (DatagramConnection) Connector.open(address);//addressに対してDatagramConnection(conn)を開く。
+        ((RadiogramConnection) conn).setMaxBroadcastHops(3);//最大ホップ数の指定
+        datagram = conn.newDatagram(conn.getMaximumLength());//受け取れるデータの最大数の指定
     }
 
     /**
@@ -120,10 +127,13 @@ class Receiver {
      * @throws IOException
      * @return message
      */
-    String message() throws IOException {
-        recv = datagram.getData();
-        message = new String(recv);
+    String onMessageReceived() throws IOException {
+        datagram.reset();//datagram内にあるデータのリセット
+        conn.receive(datagram);//DatagramConnection(conn)に送られたbyte[]データをdatagramに格納
+        recv = datagram.getData();//datagram内にあるbyte[]データをrecv変数に格納
 
-        return message;
+        recvMessage = new String(recv);//recv変数に格納されているbyte[]データをString型に型変換してrecvMessage変数に格納
+
+        return recvMessage;
     }
 }
