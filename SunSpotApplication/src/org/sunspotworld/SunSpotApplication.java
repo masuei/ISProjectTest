@@ -125,7 +125,7 @@ class Receiver {
      * 受け取ったbyte[]データ(recv)をString型に変換して、その文字列を返します。
      *
      * @throws IOException
-     * @return message
+     * @return recvMessage
      */
     String onMessageReceived() throws IOException {
         datagram.reset();//datagram内にあるデータのリセット
